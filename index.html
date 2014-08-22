@@ -1,73 +1,372 @@
-<!DOCTYPE html>
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01//EN" "http://www.w3.org/TR/html4/strict.dtd">
 <html>
-  <head>
-    <meta charset='utf-8'>
-    <meta http-equiv="X-UA-Compatible" content="chrome=1">
-    <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
-    <link rel="stylesheet" type="text/css" href="stylesheets/stylesheet.css" media="screen">
-    <link rel="stylesheet" type="text/css" href="stylesheets/pygment_trac.css" media="screen">
-    <link rel="stylesheet" type="text/css" href="stylesheets/print.css" media="print">
+<head>
+<title>背景墙</title>
+<meta http-equiv="imagetoolbar" content="no">
+<style type="text/css">
+	html {
+		overflow: hidden;
+	}
+	.fanhui
+	{
+		padding:20px;
+	}
+	a:link,a:visited
+	{
+		text-decoration:none;
+		color:#FFFFFF;  
+	} 
+	body {
+		position: absolute;
+		margin: 0px;
+		padding: 0px;
+		background: #eee;
+		width: 100%;
+		height: 100%;
+		color: #fff;
+		font-family: arial;
+		font-size: 0.8em;
+	}
+	#screen {
+		position: absolute;
+		width: 100%;
+		height: 100%;
+		background: #000;
+		overflow: hidden;
+	}
+	#screen img, canvas { 
+		position: absolute;
+		left: -9999px;
+		cursor: pointer;
+        image-rendering: optimizeSpeed;
 
-    <!--[if lt IE 9]>
-    <script src="//html5shiv.googlecode.com/svn/trunk/html5.js"></script>
-    <![endif]-->
+	}
+	#screen .href {
+		border: #FFF dotted 1px;
+	}
+	#screen .fog { 
+		position: absolute;
+		background: #fff;
+		opacity: 0.1;
+		filter: alpha(opacity=10);
+	}
+	#command {
+		position:absolute;
+		left: 1em;
+		top: 1em;
+		width: 130px;
+		z-index: 30000;
+		background:#000;
+		border: #000 solid 1em;
+	}
+	#bar {
+		position:relative;
+		left: 1em;
+		top: 1em;
+		height: 160px;
+	}
+	#bar .button { 
+		position: absolute;
+		background: #222;
+		width: 20px;
+		height: 20px;
+		cursor: pointer;
+	}
+	#bar .loaded { 
+		background: #666;
+	}
+	#bar .viewed { 
+		background: #fff;
+	}
+	#bar .selected { 
+		background: #f00;
+	}
+	#urlInfo {
+		position: absolute;
+		background: url(images/r.gif) no-repeat 0 4px;
+		visibility: hidden;
+		z-index: 30000;
+		padding-left: 12px;
+		cursor: pointer;
+	}
+</style>
 
-    <title>Manman by manman4114211</title>
-  </head>
+<script type="text/javascript">
+var m3D = function () {
+	/* ---- 局部变量 ---- */
+	var diapo = [],
+		imb,
+		scr,
+		bar,
+		selected,
+		urlInfo,
+		imagesPath = "images/",
+		camera = {x:0, y:0, z:-650, s:0, fov: 500},
+		nw = 0,
+		nh = 0;
+	camera.setTarget = function (c0, t1, p) {
+		if (Math.abs(t1 - c0) > .1) {
+			camera.s = 1;
+			camera.p = 0;
+			camera.d = t1 - c0;
+			if (p) {
+				camera.d *= 2;
+				camera.p = 9;
+			}
+		}
+	}
+	camera.tween = function (v) {
+		if (camera.s != 0) {
+			camera.p += camera.s;
+			camera[v] += camera.d * camera.p * .01;
+			if (camera.p == 10) camera.s = -1;
+			else if (camera.p == 0) camera.s = 0;
+		}
+		return camera.s;
+	}
+	var Diapo = function (n, img, x, y, z) {
+		if (img) {
+			this.url = img.url;
+			this.title = img.title;
+			this.color = img.color;
+			this.isLoaded = false;
+			if (document.createElement("canvas").getContext) {
+				/* ---- 使用玻璃代替图像 ---- */
+				this.srcImg = new Image();
+				this.srcImg.src = imagesPath + img.src;
+				this.img = document.createElement("canvas");
+				this.canvas = true;
+				scr.appendChild(this.img);
+			} else {
+				/* ---- 正常图像 ---- */
+				this.img = document.createElement('img');
+				this.img.src = imagesPath + img.src;
+				scr.appendChild(this.img);
+			}
+			/* ---- 单击事件 ---- */
+			this.img.onclick = function () {
+				if (camera.s) return;
+				if (this.diapo.isLoaded) {
+					if (this.diapo.urlActive) {
+						/* ---- 跳到连接 ---- */
+						top.location.href = this.diapo.url;
+					} else {
+						/* ---- 目标位置 ---- */
+						camera.tz = this.diapo.z - camera.fov;
+						camera.tx = this.diapo.x;
+						camera.ty = this.diapo.y;
+						/* ---- 选择的图片的动画 ---- */
+						if (selected) {
+							selected.but.className = "button viewed";
+							selected.img.className = "";
+							selected.img.style.cursor = "pointer";
+							selected.urlActive = false;
+							urlInfo.style.visibility = "hidden";
+						}
+						/* ---- 选择图片---- */
+						this.diapo.but.className = "button selected";
+						interpolation(false);
+						selected = this.diapo;
+					}
+				}
+			}
+			/* ---- 按钮 ---- */
+			this.but = document.createElement('div');
+			this.but.className = "button";
+			bar.appendChild(this.but);
+			this.but.diapo = this;
+			this.but.style.left = Math.round((this.but.offsetWidth  * 1.2) * (n % 4)) + 'px';
+			this.but.style.top  = Math.round((this.but.offsetHeight * 1.2) * Math.floor(n / 4)) + 'px';
+			this.but.onclick = this.img.onclick;
+			imb = this.img;
+			this.img.diapo = this;
+			this.zi = 25000;
+		} else {
+			/* ---- 改变盒子---- */
+			this.img = document.createElement('div');
+			this.isLoaded = true;
+			this.img.className = "fog";
+			scr.appendChild(this.img);
+			this.w = 300;
+			this.h = 300;
+			this.zi = 15000;
+		}
+		/* ---- 对象赋值 ---- */
+		this.x = x;
+		this.y = y;
+		this.z = z;
+		this.css = this.img.style;
+	}
+	/* ==== 3d功能 ==== */
+	Diapo.prototype.anim = function () {
+		if (this.isLoaded) {
+			/* ---- 3d转至平面---- */
+			var x = this.x - camera.x;
+			var y = this.y - camera.y;
+			var z = this.z - camera.z;
+			if (z < 20) z += 5000;
+			var p = camera.fov / z;
+			var w = this.w * p;
+			var h = this.h * p;
+			this.css.left   = Math.round(nw + x * p - w * .5) + 'px';
+			this.css.top    = Math.round(nh + y * p - h * .5) + 'px';  
+			this.css.width  = Math.round(w) + 'px';
+			this.css.height = Math.round(h) + 'px';
+			this.css.zIndex = this.zi - Math.round(z);
+		} else {
+			/* ---- 对象是否在载入 ---- */
+			this.isLoaded = this.loading();
+		}
+	}
+	/* ==== 初始化 ==== */
+	Diapo.prototype.loading = function () {
+		if ((this.canvas && this.srcImg.complete) || this.img.complete) {
+			if (this.canvas) {
+				this.w = this.srcImg.width;
+				this.h = this.srcImg.height;
+				this.img.width = this.w;
+				this.img.height = this.h;
+				var context = this.img.getContext("2d");
+				context.drawImage(this.srcImg, 0, 0, this.w, this.h);
+			} else {
+				/* ---- plain image version ---- */
+				this.w = this.img.width;
+				this.h = this.img.height;
+			}
+			/* ---- 载入按钮 ---- */
+			this.but.className += " loaded";
+			return true;
+		}
+		return false;
+	}
+	////////////////////////////////////////////////////////////////////////////
+	/* ==== 屏幕尺寸==== */
+	var resize = function () {
+		nw = scr.offsetWidth * .5;
+		nh = scr.offsetHeight * .5;
+	}
+	/* ==== 禁用动画 ==== */
+	var interpolation = function (bicubic) {
+		var i = 0, o;
+		while( o = diapo[i++] ) {
+			if (o.but) {
+				o.css.msInterpolationMode = bicubic ? 'bicubic' : 'nearest-neighbor'; // makes IE8 happy
+				o.css.imageRendering = bicubic ? 'optimizeQuality' : 'optimizeSpeed'; // does not really work...
+			}
+		}
+	}
+	var init = function (data) {
+		/* ---- 盒子 ---- */
+		scr = document.getElementById("screen");
+		bar = document.getElementById("bar");
+		urlInfo = document.getElementById("urlInfo");
+		resize();
+		/* ---- 载入图像---- */
+		var i = 0, 
+		    o,
+			n = data.length;
+		while( o = data[i++] ) {
+			/* ---- 图像---- */
+			var x = 1000 * ((i % 4) - 1.5);
+			var y = Math.round(Math.random() * 4000) - 2000;
+			var z = i * (5000 / n);
+			diapo.push( new Diapo(i - 1, o, x, y, z));
+			/* ---- 改变边框 ---- */
+			var k = diapo.length - 1;
+			for (var j = 0; j < 3; j++) {
+				var x = Math.round(Math.random() * 4000) - 2000;
+				var y = Math.round(Math.random() * 4000) - 2000;
+				diapo.push( new Diapo(k, null, x, y, z + 100));
+			}
+		}
+		run();
+	}
+	var run = function () {
+		if (camera.tx) {
+			if (!camera.s) camera.setTarget(camera.x, camera.tx);
+			var m = camera.tween('x');
+			if (!m) camera.tx = 0;
+		} else if (camera.ty) {
+			if (!camera.s) camera.setTarget(camera.y, camera.ty); 
+			var m = camera.tween('y');
+			if (!m) camera.ty = 0;
+		} else if (camera.tz) {
+			if (!camera.s) camera.setTarget(camera.z, camera.tz);
+			var m = camera.tween('z');
+			if (!m) {
+				camera.tz = 0;
+				interpolation(true);
+				if (selected.url) {
+					selected.img.style.cursor = "pointer";
+					selected.urlActive = true;
+					selected.img.className = "href";
+					urlInfo.diapo = selected;
+					urlInfo.onclick = selected.img.onclick;
+					urlInfo.innerHTML = selected.title || selected.url;
+					urlInfo.style.visibility = "visible";
+					urlInfo.style.color = selected.color || "#fff";
+					urlInfo.style.top = Math.round(selected.img.offsetTop + selected.img.offsetHeight - urlInfo.offsetHeight - 5) + "px";
+					urlInfo.style.left = Math.round(selected.img.offsetLeft + selected.img.offsetWidth - urlInfo.offsetWidth - 5) + "px";
+				} else {
+					selected.img.style.cursor = "default";
+				}
+			}
+		}
+		var i = 0, o;
+		while( o = diapo[i++] ) o.anim();
+		/* ----循环 ---- */
+		setTimeout(run, 32);
+	}
+	return {
+		/* ==== 初始化 ==== */
+		init : init
+	}
+}();
 
-  <body>
-    <header>
-      <div class="inner">
-        <h1>Manman</h1>
-        <h2>Homepage</h2>
-        <a href="https://github.com/manman4114211" class="button"><small>Follow me on</small>GitHub</a>
-      </div>
-    </header>
+</script>
+</head>
 
-    <div id="content-wrapper">
-      <div class="inner clearfix">
-        <section id="main-content">
-          <h3>
-<a name="welcome-to-github-pages" class="anchor" href="#welcome-to-github-pages"><span class="octicon octicon-link"></span></a>Welcome to GitHub Pages.</h3>
-
-<p>This automatic page generator is the easiest way to create beautiful pages for all of your projects. Author your page content here using GitHub Flavored Markdown, select a template crafted by a designer, and publish. After your page is generated, you can check out the new branch:</p>
-
-<pre><code>$ cd your_repo_root/repo_name
-$ git fetch origin
-$ git checkout gh-pages
-</code></pre>
-
-<p>If you're using the GitHub for Mac, simply sync your repository and you'll see the new branch.</p>
-
-<h3>
-<a name="designer-templates" class="anchor" href="#designer-templates"><span class="octicon octicon-link"></span></a>Designer Templates</h3>
-
-<p>We've crafted some handsome templates for you to use. Go ahead and continue to layouts to browse through them. You can easily go back to edit your page before publishing. After publishing your page, you can revisit the page generator and switch to another theme. Your Page content will be preserved if it remained markdown format.</p>
-
-<h3>
-<a name="rather-drive-stick" class="anchor" href="#rather-drive-stick"><span class="octicon octicon-link"></span></a>Rather Drive Stick?</h3>
-
-<p>If you prefer to not use the automatic generator, push a branch named <code>gh-pages</code> to your repository to create a page manually. In addition to supporting regular HTML content, GitHub Pages support Jekyll, a simple, blog aware static site generator written by our own Tom Preston-Werner. Jekyll makes it easy to create site-wide headers and footers without having to copy them across every page. It also offers intelligent blog support and other advanced templating features.</p>
-
-<h3>
-<a name="authors-and-contributors" class="anchor" href="#authors-and-contributors"><span class="octicon octicon-link"></span></a>Authors and Contributors</h3>
-
-<p>You can <a href="https://github.com/blog/821" class="user-mention">@mention</a> a GitHub username to generate a link to their profile. The resulting <code>&lt;a&gt;</code> element will link to the contributor's GitHub Profile. For example: In 2007, Chris Wanstrath (<a href="https://github.com/defunkt" class="user-mention">@defunkt</a>), PJ Hyett (<a href="https://github.com/pjhyett" class="user-mention">@pjhyett</a>), and Tom Preston-Werner (<a href="https://github.com/mojombo" class="user-mention">@mojombo</a>) founded GitHub.</p>
-
-<h3>
-<a name="support-or-contact" class="anchor" href="#support-or-contact"><span class="octicon octicon-link"></span></a>Support or Contact</h3>
-
-<p>Having trouble with Pages? Check out the documentation at <a href="http://help.github.com/pages">http://help.github.com/pages</a> or contact <a href="mailto:support@github.com">support@github.com</a> and we鈥檒l help you sort it out.</p>
-        </section>
-
-        <aside id="sidebar">
-
-
-          <p>This page was generated by <a href="https://pages.github.com">GitHub Pages</a> using the Architect theme by <a href="https://twitter.com/jasonlong">Jason Long</a>.</p>
-        </aside>
-      </div>
-    </div>
-
-  
-  </body>
+<body>
+<div id="screen">
+	<div id="command">
+		<h1>流年，不曾逝去</h1>
+		 毕业骊歌 盛夏流年, 不经意间。
+		<div id="bar"></div>
+	</div>
+	<div id="urlInfo"></div>
+</div>
+<script type="text/javascript">
+/* 启用js */
+setTimeout(function() {
+	m3D.init(
+		[ 
+			{ src: '01.jpg', url: '#', title: 'jump to random script', color: '#fff' },
+			{ src: '02.jpg' },
+			{ src: '03.jpg' },
+			{ src: '04.jpg' },
+			{ src: '05.jpg' },
+			{ src: '06.jpg' },
+			{ src: '07.jpg' },
+			{ src: '08.jpg' },
+			{ src: '09.jpg' },
+			{ src: '10.jpg' },
+			{ src: '11.jpg' },
+			{ src: '12.jpg' },
+			{ src: '13.jpg' },
+			{ src: '14.jpg' },
+			{ src: '15.jpg' },
+			{ src: '16.jpg' },
+			{ src: '17.jpg' },
+			{ src: '18.jpg' },
+			{ src: '19.jpg' },
+			{ src: '20.jpg' },
+			{ src: '21.jpg' },
+			{ src: '22.jpg' },
+			{ src: '23.jpg' },
+			{ src: '24.jpg', url: '#', color: '#fff' }
+		]
+	);
+}, 500);
+</script>
+</body>
 </html>
