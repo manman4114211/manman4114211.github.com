@@ -1,375 +1,669 @@
-<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01//EN" "http://www.w3.org/TR/html4/strict.dtd">
+<!--
+Author: W3layouts
+Author URL: http://w3layouts.com
+License: Creative Commons Attribution 3.0 Unported
+License URL: http://creativecommons.org/licenses/by/3.0/
+-->
+<!DOCTYPE HTML>
 <html>
-<head>
-    <meta charset='utf-8'>
-    <meta http-equiv="X-UA-Compatible" content="chrome=1">
-    <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
-<title>Graduation season</title>
-<meta http-equiv="imagetoolbar" content="no">
-<style type="text/css">
-	html {
-		overflow: hidden;
-	}
-	.fanhui
-	{
-		padding:20px;
-	}
-	a:link,a:visited
-	{
-		text-decoration:none;
-		color:#FFFFFF;  
-	} 
-	body {
-		position: absolute;
-		margin: 0px;
-		padding: 0px;
-		background: #eee;
-		width: 100%;
-		height: 100%;
-		color: #fff;
-		font-family: arial;
-		font-size: 0.8em;
-	}
-	#screen {
-		position: absolute;
-		width: 100%;
-		height: 100%;
-		background: #000;
-		overflow: hidden;
-	}
-	#screen img, canvas { 
-		position: absolute;
-		left: -9999px;
-		cursor: pointer;
-        image-rendering: optimizeSpeed;
-
-	}
-	#screen .href {
-		border: #FFF dotted 1px;
-	}
-	#screen .fog { 
-		position: absolute;
-		background: #fff;
-		opacity: 0.1;
-		filter: alpha(opacity=10);
-	}
-	#command {
-		position:absolute;
-		left: 1em;
-		top: 1em;
-		width: 130px;
-		z-index: 30000;
-		background:#000;
-		border: #000 solid 1em;
-	}
-	#bar {
-		position:relative;
-		left: 1em;
-		top: 1em;
-		height: 160px;
-	}
-	#bar .button { 
-		position: absolute;
-		background: #222;
-		width: 20px;
-		height: 20px;
-		cursor: pointer;
-	}
-	#bar .loaded { 
-		background: #666;
-	}
-	#bar .viewed { 
-		background: #fff;
-	}
-	#bar .selected { 
-		background: #f00;
-	}
-	#urlInfo {
-		position: absolute;
-		background: url(images/r.gif) no-repeat 0 4px;
-		visibility: hidden;
-		z-index: 30000;
-		padding-left: 12px;
-		cursor: pointer;
-	}
-</style>
-
-<script type="text/javascript">
-var m3D = function () {
-	/* ---- 局部变量 ---- */
-	var diapo = [],
-		imb,
-		scr,
-		bar,
-		selected,
-		urlInfo,
-		imagesPath = "images/",
-		camera = {x:0, y:0, z:-650, s:0, fov: 500},
-		nw = 0,
-		nh = 0;
-	camera.setTarget = function (c0, t1, p) {
-		if (Math.abs(t1 - c0) > .1) {
-			camera.s = 1;
-			camera.p = 0;
-			camera.d = t1 - c0;
-			if (p) {
-				camera.d *= 2;
-				camera.p = 9;
-			}
-		}
-	}
-	camera.tween = function (v) {
-		if (camera.s != 0) {
-			camera.p += camera.s;
-			camera[v] += camera.d * camera.p * .01;
-			if (camera.p == 10) camera.s = -1;
-			else if (camera.p == 0) camera.s = 0;
-		}
-		return camera.s;
-	}
-	var Diapo = function (n, img, x, y, z) {
-		if (img) {
-			this.url = img.url;
-			this.title = img.title;
-			this.color = img.color;
-			this.isLoaded = false;
-			if (document.createElement("canvas").getContext) {
-				/* ---- 使用玻璃代替图像 ---- */
-				this.srcImg = new Image();
-				this.srcImg.src = imagesPath + img.src;
-				this.img = document.createElement("canvas");
-				this.canvas = true;
-				scr.appendChild(this.img);
-			} else {
-				/* ---- 正常图像 ---- */
-				this.img = document.createElement('img');
-				this.img.src = imagesPath + img.src;
-				scr.appendChild(this.img);
-			}
-			/* ---- 单击事件 ---- */
-			this.img.onclick = function () {
-				if (camera.s) return;
-				if (this.diapo.isLoaded) {
-					if (this.diapo.urlActive) {
-						/* ---- 跳到连接 ---- */
-						top.location.href = this.diapo.url;
-					} else {
-						/* ---- 目标位置 ---- */
-						camera.tz = this.diapo.z - camera.fov;
-						camera.tx = this.diapo.x;
-						camera.ty = this.diapo.y;
-						/* ---- 选择的图片的动画 ---- */
-						if (selected) {
-							selected.but.className = "button viewed";
-							selected.img.className = "";
-							selected.img.style.cursor = "pointer";
-							selected.urlActive = false;
-							urlInfo.style.visibility = "hidden";
-						}
-						/* ---- 选择图片---- */
-						this.diapo.but.className = "button selected";
-						interpolation(false);
-						selected = this.diapo;
-					}
-				}
-			}
-			/* ---- 按钮 ---- */
-			this.but = document.createElement('div');
-			this.but.className = "button";
-			bar.appendChild(this.but);
-			this.but.diapo = this;
-			this.but.style.left = Math.round((this.but.offsetWidth  * 1.2) * (n % 4)) + 'px';
-			this.but.style.top  = Math.round((this.but.offsetHeight * 1.2) * Math.floor(n / 4)) + 'px';
-			this.but.onclick = this.img.onclick;
-			imb = this.img;
-			this.img.diapo = this;
-			this.zi = 25000;
-		} else {
-			/* ---- 改变盒子---- */
-			this.img = document.createElement('div');
-			this.isLoaded = true;
-			this.img.className = "fog";
-			scr.appendChild(this.img);
-			this.w = 300;
-			this.h = 300;
-			this.zi = 15000;
-		}
-		/* ---- 对象赋值 ---- */
-		this.x = x;
-		this.y = y;
-		this.z = z;
-		this.css = this.img.style;
-	}
-	/* ==== 3d功能 ==== */
-	Diapo.prototype.anim = function () {
-		if (this.isLoaded) {
-			/* ---- 3d转至平面---- */
-			var x = this.x - camera.x;
-			var y = this.y - camera.y;
-			var z = this.z - camera.z;
-			if (z < 20) z += 5000;
-			var p = camera.fov / z;
-			var w = this.w * p;
-			var h = this.h * p;
-			this.css.left   = Math.round(nw + x * p - w * .5) + 'px';
-			this.css.top    = Math.round(nh + y * p - h * .5) + 'px';  
-			this.css.width  = Math.round(w) + 'px';
-			this.css.height = Math.round(h) + 'px';
-			this.css.zIndex = this.zi - Math.round(z);
-		} else {
-			/* ---- 对象是否在载入 ---- */
-			this.isLoaded = this.loading();
-		}
-	}
-	/* ==== 初始化 ==== */
-	Diapo.prototype.loading = function () {
-		if ((this.canvas && this.srcImg.complete) || this.img.complete) {
-			if (this.canvas) {
-				this.w = this.srcImg.width;
-				this.h = this.srcImg.height;
-				this.img.width = this.w;
-				this.img.height = this.h;
-				var context = this.img.getContext("2d");
-				context.drawImage(this.srcImg, 0, 0, this.w, this.h);
-			} else {
-				/* ---- plain image version ---- */
-				this.w = this.img.width;
-				this.h = this.img.height;
-			}
-			/* ---- 载入按钮 ---- */
-			this.but.className += " loaded";
-			return true;
-		}
-		return false;
-	}
-	////////////////////////////////////////////////////////////////////////////
-	/* ==== 屏幕尺寸==== */
-	var resize = function () {
-		nw = scr.offsetWidth * .5;
-		nh = scr.offsetHeight * .5;
-	}
-	/* ==== 禁用动画 ==== */
-	var interpolation = function (bicubic) {
-		var i = 0, o;
-		while( o = diapo[i++] ) {
-			if (o.but) {
-				o.css.msInterpolationMode = bicubic ? 'bicubic' : 'nearest-neighbor'; // makes IE8 happy
-				o.css.imageRendering = bicubic ? 'optimizeQuality' : 'optimizeSpeed'; // does not really work...
-			}
-		}
-	}
-	var init = function (data) {
-		/* ---- 盒子 ---- */
-		scr = document.getElementById("screen");
-		bar = document.getElementById("bar");
-		urlInfo = document.getElementById("urlInfo");
-		resize();
-		/* ---- 载入图像---- */
-		var i = 0, 
-		    o,
-			n = data.length;
-		while( o = data[i++] ) {
-			/* ---- 图像---- */
-			var x = 1000 * ((i % 4) - 1.5);
-			var y = Math.round(Math.random() * 4000) - 2000;
-			var z = i * (5000 / n);
-			diapo.push( new Diapo(i - 1, o, x, y, z));
-			/* ---- 改变边框 ---- */
-			var k = diapo.length - 1;
-			for (var j = 0; j < 3; j++) {
-				var x = Math.round(Math.random() * 4000) - 2000;
-				var y = Math.round(Math.random() * 4000) - 2000;
-				diapo.push( new Diapo(k, null, x, y, z + 100));
-			}
-		}
-		run();
-	}
-	var run = function () {
-		if (camera.tx) {
-			if (!camera.s) camera.setTarget(camera.x, camera.tx);
-			var m = camera.tween('x');
-			if (!m) camera.tx = 0;
-		} else if (camera.ty) {
-			if (!camera.s) camera.setTarget(camera.y, camera.ty); 
-			var m = camera.tween('y');
-			if (!m) camera.ty = 0;
-		} else if (camera.tz) {
-			if (!camera.s) camera.setTarget(camera.z, camera.tz);
-			var m = camera.tween('z');
-			if (!m) {
-				camera.tz = 0;
-				interpolation(true);
-				if (selected.url) {
-					selected.img.style.cursor = "pointer";
-					selected.urlActive = true;
-					selected.img.className = "href";
-					urlInfo.diapo = selected;
-					urlInfo.onclick = selected.img.onclick;
-					urlInfo.innerHTML = selected.title || selected.url;
-					urlInfo.style.visibility = "visible";
-					urlInfo.style.color = selected.color || "#fff";
-					urlInfo.style.top = Math.round(selected.img.offsetTop + selected.img.offsetHeight - urlInfo.offsetHeight - 5) + "px";
-					urlInfo.style.left = Math.round(selected.img.offsetLeft + selected.img.offsetWidth - urlInfo.offsetWidth - 5) + "px";
-				} else {
-					selected.img.style.cursor = "default";
-				}
-			}
-		}
-		var i = 0, o;
-		while( o = diapo[i++] ) o.anim();
-		/* ----循环 ---- */
-		setTimeout(run, 32);
-	}
-	return {
-		/* ==== 初始化 ==== */
-		init : init
-	}
-}();
-
-</script>
-</head>
-
-<body>
-<div id="screen">
-	<div id="command">
-		<h1>Graduation Song</h1>
-		 Summer fleeting, inadvertently. Fleeting, never went away.
-		<div id="bar"></div>
-	</div>
-	<div id="urlInfo"></div>
-</div>
-<script type="text/javascript">
-/* 启用js */
-setTimeout(function() {
-	m3D.init(
-		[ 
-			{ src: '01.jpg', url: '#', title: 'jump to random script', color: '#fff' },
-			{ src: '02.jpg' },
-			{ src: '03.jpg' },
-			{ src: '04.jpg' },
-			{ src: '05.jpg' },
-			{ src: '06.jpg' },
-			{ src: '07.jpg' },
-			{ src: '08.jpg' },
-			{ src: '09.jpg' },
-			{ src: '10.jpg' },
-			{ src: '11.jpg' },
-			{ src: '12.jpg' },
-			{ src: '13.jpg' },
-			{ src: '14.jpg' },
-			{ src: '15.jpg' },
-			{ src: '16.jpg' },
-			{ src: '17.jpg' },
-			{ src: '18.jpg' },
-			{ src: '19.jpg' },
-			{ src: '20.jpg' },
-			{ src: '21.jpg' },
-			{ src: '22.jpg' },
-			{ src: '23.jpg' },
-			{ src: '24.jpg', url: '#', color: '#fff' }
-		]
-	);
-}, 500);
-</script>
-</body>
+	<head>
+		<title>my.kingdom Website Template | Home :: w3layouts</title>
+		<link href="./css/style.css" rel='stylesheet' type='text/css' />
+		<meta name="viewport" content="width=device-width, initial-scale=1">
+		<script type="application/x-javascript"> addEventListener("load", function() { setTimeout(hideURLbar, 0); }, false); function hideURLbar(){ window.scrollTo(0,1); } </script>
+		</script>
+		<script src="./js/jquery.min.js"></script>
+		<!---webfonts--->
+		<!--<link href='http://fonts.googleapis.com/css?family=Maven+Pro:400,500,700,900' rel='stylesheet' type='text/css'>--->
+		<!---//webfonts--->
+		<!---pop-up-box---->
+		<link href="./css/popuo-box.css" rel="stylesheet" type="text/css" media="all"/>
+		<script src="./js/jquery.magnific-popup.js" type="text/javascript"></script>
+		<!---//pop-up-box---->
+		<!---color-style-switcher---->
+		<script type="text/javascript">
+		$(document).ready(function() {
+		// red
+		$("#css-red").click(function() {
+		$("link[rel=stylesheet]").attr({href : "./css/style.css"});
+		});
+		// red-bg
+		$(".red-bg").click(function() {
+		$("link[rel=stylesheet]").attr({href : "./css/style.css"});
+		});
+		// yellow
+		$("#css-yellow").click(function() {
+		$("link[rel=stylesheet]").attr({href : "./css/yellow.css"});
+		});
+		// yellow-bg
+		$(".yellow-bg").click(function() {
+		$("link[rel=stylesheet]").attr({href : "./css/yellow.css"});
+		});
+		// black
+		$("#css-black").click(function() {
+		$("link[rel=stylesheet]").attr({href : "./css/black.css"});
+		});
+		// black-bg
+		$(".black-bg").click(function() {
+		$("link[rel=stylesheet]").attr({href : "./css/black.css"});
+		});
+		// gray
+		$("#css-gray").click(function() {
+		$("link[rel=stylesheet]").attr({href : "./css/gray.css"});
+		});
+		// gray-bg
+		$(".gray-bg").click(function() {
+		$("link[rel=stylesheet]").attr({href : "./css/gray.css"});
+		});
+		});
+		</script>
+		<!---//color-style-switcher---->
+	</head>
+	<body>
+		<!----wrap---->
+		<div class="top-bannar" id="move-top">
+				<div class="top-header">
+					<div class="wrap"> 
+					<!---logo--->
+					<div class="logo">
+						<h1><a href="#">my.kingdom<span> </span> </a></h1>
+					</div>
+					<!---//logo--->
+					<!--top-nav---->
+					<div class="top-nav">
+						<div class="nav-icon">
+					    <a href="#" class="right_bt" id="activator"><span> </span> </a>
+						</div>
+						 <div class="box" id="box">
+							 <div class="box_content">        					                         
+								<div class="box_content_center">
+								 	<div class="form_content">
+										<div class="menu_box_list">
+											<ul>
+												<li><a href="#home"><span>home</span></a></li>
+												<li><a href="#about"><span>About</span></a></li>
+												<li><a href="#works"><span>Works</span></a></li>
+												<li><a href="#demo"><span>Demo</span></a></li>
+												<li><a href="#blog"><span>Blog</span></a></li>
+												<li><a href="#contact"><span>Contact</span></a></li>
+												<div class="clear"> </div>
+											</ul>
+										</div>
+										<a class="boxclose" id="boxclose"> <span> </span></a>
+									</div>                                  
+								</div> 	
+							</div> 
+						</div>       	  
+					</div>
+					<!---start-click-drop-down-menu----->
+			        <!----start-dropdown--->
+			         <script type="text/javascript">
+						var $ = jQuery.noConflict();
+							$(function() {
+								$('#activator').click(function(){
+									$('#box').animate({'top':'0px'},900);
+								});
+								$('#boxclose').click(function(){
+								$('#box').animate({'top':'-1000px'},900);
+								});
+							});
+							$(document).ready(function(){
+							//Hide (Collapse) the toggle containers on load
+							$(".toggle_container").hide(); 
+							//Switch the "Open" and "Close" state per click then slide up/down (depending on open/close state)
+							$(".trigger").click(function(){
+								$(this).toggleClass("active").next().slideToggle("slow");
+									return false; //Prevent the browser jump to the link anchor
+							});
+												
+						});
+					</script>
+					<!---//End-click-drop-down-menu----->
+					<!--top-nav---->
+					<div class="clear"> </div>
+					<!---header-welcomenote--->
+					<div class="header-welcome-note">
+						<h2>We make websites and apps that you'll love to have.</h2>
+						<a href="#about"><span> </span> see what i have done so far.</a>
+					</div>
+					<!---//header-welcomenote--->
+				</div>
+				</div>
+		</div>
+		<!---start-content--->
+		<div class="content">
+			<!---slide-panel--->
+			<div id="slideout">
+			  <img src="./images/cog.png" alt="settings" />
+			  <div id="slideout_inner">
+			    <!----start-colorswitcher--->
+				<div class="colorswitcher">
+					<ul class="theam-colors">
+						<li><a class="red" id="./css-red" href="#red"> </a></li>
+						<li><a class="yellow" id="./css-yellow" href="#yellow"> </a></li>
+						<li><a class="black" id="./css-black" href="#black"> </a></li>
+						<li><a class="gray" id="./css-gray" href="#gray"> </a></li>
+					</ul>
+					<ul class="theam-bgs">
+						<li><a class="red-bg" class="./css-red" href="#red"> </a></li>
+						<li><a class="yellow-bg" class="./css-yellow" href="#yellow"> </a></li>
+						<li><a class="black-bg" class="./css-black" href="#black"> </a></li>
+						<li><a class="gray-bg" class="./css-gray" href="#gray"> </a></li>
+					</ul>
+					<div class="clear"> </div>
+				</div>
+				<!----//End-colorswitcher--->
+			  </div>
+			</div>
+			<div class="wrap">
+				<div class="top-grids" id="about">
+					<h3>Welcome! <span> </span></h3>
+					<div class="top-grid top-frist">
+						<p class="welcome-para">We implement Awesome ideas into full scale Projects.</p>
+						<a href="#"> <span> </span>Learn more about us</a>
+					</div>
+					<div class="top-grid">
+						<h4><span class="icon1"> </span> Colabarate</h4>
+						<p>Sed ut perspiciatis unde omnis iste natus error sit voluptatem accusantium doloremque laudantium, totam rem aperiam, eaque ipsa quae ab.</p>
+					</div>
+					<div class="top-grid">
+						<h4><span class="icon2"> </span> Creative</h4>
+						<p>Neque porro quisquam est, qui dolorem ipsum quia dolor sit amet, consectetur, adipisci velit, sed quia non numquam eius modi tempora incidunt ut labore et.</p>
+					</div>
+					<div class="top-grid">
+						<h4><span class="icon3"> </span> Development</h4>
+						<p>Voluptatem accusantium doloremque laudantium, totam rem aperiam, eaque ipsa quae ab illo inventore.</p>
+					</div>
+					<div class="clear"> </div>
+				</div>
+			</div>
+			<!---start-works--->
+			<div class="works" id="works">
+				<div class="wrap">
+					<h2>Featured work.<span> </span></h2>
+				</div>
+				<!-- BEGIN .wmuSlider -->
+				    <div class="wmuSlider example3">
+				        <div class="wmuSliderWrapper">
+				            <article>
+				            	<div class="wrap">
+				            	<div class="artical-info">
+				            		<h4>Right here we've got something you gonna love!</h4>
+				            		<p>Sed ut perspiciatis unde omnis iste natus error sit voluptatem accusantium doloremque laudantium, totam rem aperiam.Sed ut perspiciatis unde omnis iste natus error sit voluptatem accusantium doloremque laudantium, totam rem aperiam.</p>
+				            		<a href="#"><span> </span>View all works</a>
+				            	</div>
+				            	<div class="artical-pic">
+				            		<img src="./images/slider1.jpg" />
+				            		<div class="artical-pic-head">
+				            			<div class="artical-pic-head-left">
+				            				<a href="#"><h4>digital Agency</h4></a>
+				            				<span>Web design/Fontend  Development</span>
+				            			</div>
+				            			<div class="artical-pic-head-right">
+				            				<a href="#">145<label> </label> </a>
+				            			</div>
+				            			<div class="clear"> </div>
+				            		</div>
+				            		<p>Totam rem aperiam, eaque ipsa quae ab illo inventore veritatis et quasi architecto beatae vitae dicta sunt explicabo.</p>
+				            		<a class="readmore" href="#"><span> </span> View details</a>
+				            	</div>
+				            	</div>
+				            </article>
+				            <article>
+				               <div class="wrap">
+				            	<div class="artical-info">
+				            		<h4>Right here we've got something you gonna love!</h4>
+				            		<p>Sed ut perspiciatis unde omnis iste natus error sit voluptatem accusantium doloremque laudantium, totam rem aperiam.Sed ut perspiciatis unde omnis iste natus error sit voluptatem accusantium doloremque laudantium, totam rem aperiam.</p>
+				            		<a href="#"><span> </span>View all works</a>
+				            	</div>
+				            	<div class="artical-pic">
+				            		<img src="./images/slider2.jpg" />
+				            		<div class="artical-pic-head">
+				            			<div class="artical-pic-head-left">
+				            				<a href="#"><h4>digital Agency</h4></a>
+				            				<span>Web design/Fontend  Development</span>
+				            			</div>
+				            			<div class="artical-pic-head-right">
+				            				<a href="#">145<label> </label> </a>
+				            			</div>
+				            			<div class="clear"> </div>
+				            		</div>
+				            		<p>Totam rem aperiam, eaque ipsa quae ab illo inventore veritatis et quasi architecto beatae vitae dicta sunt explicabo.</p>
+				            		<a class="readmore" href="#"><span> </span> View details</a>
+				            	</div>
+				            	</div>
+				            </article>
+				             <article>
+				            	<div class="wrap">
+				            	<div class="artical-info">
+				            		<h4>Right here we've got something you gonna love!</h4>
+				            		<p>Sed ut perspiciatis unde omnis iste natus error sit voluptatem accusantium doloremque laudantium, totam rem aperiam.Sed ut perspiciatis unde omnis iste natus error sit voluptatem accusantium doloremque laudantium, totam rem aperiam.</p>
+				            		<a href="#"><span> </span>View all works</a>
+				            	</div>
+				            	<div class="artical-pic">
+				            		<img src="./images/slider5.jpg" />
+				            		<div class="artical-pic-head">
+				            			<div class="artical-pic-head-left">
+				            				<a href="#"><h4>digital Agency</h4></a>
+				            				<span>Web design/Fontend  Development</span>
+				            			</div>
+				            			<div class="artical-pic-head-right">
+				            				<a href="#">145<label> </label> </a>
+				            			</div>
+				            			<div class="clear"> </div>
+				            		</div>
+				            		<p>Totam rem aperiam, eaque ipsa quae ab illo inventore veritatis et quasi architecto beatae vitae dicta sunt explicabo.</p>
+				            		<a class="readmore" href="#"><span> </span> View details</a>
+				            	</div>
+				            	</div>
+				            </article>
+				            <article>
+				               <div class="wrap">
+				            	<div class="artical-info">
+				            		<h4>Right here we've got something you gonna love!</h4>
+				            		<p>Sed ut perspiciatis unde omnis iste natus error sit voluptatem accusantium doloremque laudantium, totam rem aperiam.Sed ut perspiciatis unde omnis iste natus error sit voluptatem accusantium doloremque laudantium, totam rem aperiam.</p>
+				            		<a href="#"><span> </span>View all works</a>
+				            	</div>
+				            	<div class="artical-pic">
+				            		<img src="./images/slider1.jpg" />
+				            		<div class="artical-pic-head">
+				            			<div class="artical-pic-head-left">
+				            				<a href="#"><h4>digital Agency</h4></a>
+				            				<span>Web design/Fontend  Development</span>
+				            			</div>
+				            			<div class="artical-pic-head-right">
+				            				<a href="#">145<label> </label> </a>
+				            			</div>
+				            			<div class="clear"> </div>
+				            		</div>
+				            		<p>Totam rem aperiam, eaque ipsa quae ab illo inventore veritatis et quasi architecto beatae vitae dicta sunt explicabo.</p>
+				            		<a class="readmore" href="#"><span> </span> View details</a>
+				            	</div>
+				            	</div>
+				            </article>
+				        </div>
+				    <!-- END .wmuSlider -->
+				    </div>
+				    <!-- Scripts -->
+				    <script type="text/javascript" src="./js/modernizr.custom.min.js"></script>    
+				    <script src="./js/jquery.wmuSlider.js"></script>
+				    <script>
+				        $('.example3').wmuSlider({
+				            touch: Modernizr.touch,
+				            animation: 'slide',
+				            items:1
+				        });
+				    </script>
+			</div>
+			<!---//End-works--->
+			<!----fea-video---->
+			<div class="fea-video" id="demo">
+				<a class="popup-with-zoom-anim" href="javascript:;"> </a>
+				<p>Beautifully designed with technical excellence and exceptional attention to detail.</p>
+			</div>
+			<div id="small-dialog" class="mfp-hide">
+				<iframe src="" width="100%" height="400" frameborder="0" webkitallowfullscreen mozallowfullscreen allowfullscreen> </iframe>
+			</div>
+			 <script>
+					$(document).ready(function() {
+					$('.popup-with-zoom-anim').magnificPopup({
+						type: 'inline',
+						fixedContentPos: false,
+						fixedBgPos: true,
+						overflowY: 'auto',
+						closeBtnInside: true,
+						preloader: false,
+						midClick: true,
+						removalDelay: 300,
+						mainClass: 'my-mfp-zoom-in'
+					});
+																					
+					});
+			</script>								  
+			</div>
+			<!----//fea-video---->
+			<!---blog-info--->
+			<div class="blog-info" id="blog">
+				<div class="wrap">
+					<h3>Latest from the blog.<span> </span></h3>
+				</div>
+				<!----start-img-cursual---->
+				<div class="wrap">
+				<!-- start content_slider -->
+					       <div id="owl-demo" class="owl-carousel">
+				                <div class="item">
+						                <div class="item-left">
+						                	<h4>Cras at ultrices erat, sed vulputate eros nunc at augue gravida!</h4>
+						                	<p>Sed ut perspiciatis unde omnis iste natus error sit voluptatem accusantium doloremque laudantium, totam rem aperiam.</p>
+						                	<a href="#"><span> </span> View all blog posts</a>
+						                </div>
+						                <div class="item-center">
+						                	<img class="lazyOwl post-pic" data-src="./images/blog-pic.jpg" alt="Lazy Owl Image">
+						                	<div class="blog-post-info">
+						                		<div class="blog-post-info-left">
+						                			<span>Feb<label> 08</label></span>
+						                			<a href="#"><small> </small> 145</a>
+						                		</div>
+						                		<div class="blog-post-info-right">
+						                			<h4><a href="#">Right here we've got something you gonna love!</a></h4>
+						                			<ul class="stats">
+						                				<li><span>post by</span><a href="#">Themecurve</a></li>
+						                				<li><a href="#">Street</a></li>
+						                				<li><a href="#">5 Comments</a></li>
+						                				<div class="clear"> </div>
+						                			</ul>
+						                			<p class="post-text">
+						                				Sed ut perspiciatis unde omnis iste natus error sit voluptatem accusantium doloremque laudantium, totam rem...
+						                				<a class="more-info" href="#"> <span> </span>Read more</a>
+						                			</p>
+						                		</div>
+						                		<div class="clear"> </div>
+						                	</div>
+						                </div>
+						                <div class="item-right">
+						                	<p class="quot">At vero eos et accusamus et iusto odio dignissimos ducimus qui blanditiis praesentium voluptatum delenti atque corrupti </p>
+						                	<ul>
+						                		<li><a href="#">Davinski Mortge</a></li>
+						                		<li><span> </span></li>
+						                		<div class="clear"> </div>
+						                	</ul>
+						                </div>
+						                <div class="clear"> </div>
+				                </div>
+				                <div class="item">
+						                <div class="item-left">
+						                	<h4>Cras at ultrices erat, sed vulputate eros nunc at augue gravida!</h4>
+						                	<p>Sed ut perspiciatis unde omnis iste natus error sit voluptatem accusantium doloremque laudantium, totam rem aperiam.</p>
+						                	<a href="#"><span> </span> View all blog posts</a>
+						                </div>
+						                <div class="item-center">
+						                	<img class="lazyOwl post-pic" data-src="./images/blog-post1.jpg" alt="Lazy Owl Image">
+						                	<div class="blog-post-info">
+						                		<div class="blog-post-info-left">
+						                			<span>Feb<label> 08</label></span>
+						                			<a href="#"><small> </small> 145</a>
+						                		</div>
+						                		<div class="blog-post-info-right">
+						                			<h4><a href="#">Right here we've got something you gonna love!</a></h4>
+						                			<ul class="stats">
+						                				<li><span>post by</span><a href="#">Themecurve</a></li>
+						                				<li><a href="#">Street</a></li>
+						                				<li><a href="#">5 Comments</a></li>
+						                				<div class="clear"> </div>
+						                			</ul>
+						                			<p class="post-text">
+						                				Sed ut perspiciatis unde omnis iste natus error sit voluptatem accusantium doloremque laudantium, totam rem...
+						                				<a class="more-info" href="#"> <span> </span>Read more</a>
+						                			</p>
+						                		</div>
+						                		<div class="clear"> </div>
+						                	</div>
+						                </div>
+						                <div class="item-right">
+						                	<p class="quot">At vero eos et accusamus et iusto odio dignissimos ducimus qui blanditiis praesentium voluptatum delenti atque corrupti </p>
+						                	<ul>
+						                		<li><a href="#">Davinski Mortge</a></li>
+						                		<li><span> </span></li>
+						                		<div class="clear"> </div>
+						                	</ul>
+						                </div>
+						                <div class="clear"> </div>
+				                </div>
+				                <div class="item">
+						                <div class="item-left">
+						                	<h4>Cras at ultrices erat, sed vulputate eros nunc at augue gravida!</h4>
+						                	<p>Sed ut perspiciatis unde omnis iste natus error sit voluptatem accusantium doloremque laudantium, totam rem aperiam.</p>
+						                	<a href="#"><span> </span> View all blog posts</a>
+						                </div>
+						                <div class="item-center">
+						                	<img class="lazyOwl post-pic" data-src="./images/blog-post2.jpg" alt="Lazy Owl Image">
+						                	<div class="blog-post-info">
+						                		<div class="blog-post-info-left">
+						                			<span>Feb<label> 08</label></span>
+						                			<a href="#"><small> </small> 145</a>
+						                		</div>
+						                		<div class="blog-post-info-right">
+						                			<h4><a href="#">Right here we've got something you gonna love!</a></h4>
+						                			<ul class="stats">
+						                				<li><span>post by</span><a href="#">Themecurve</a></li>
+						                				<li><a href="#">Street</a></li>
+						                				<li><a href="#">5 Comments</a></li>
+						                				<div class="clear"> </div>
+						                			</ul>
+						                			<p class="post-text">
+						                				Sed ut perspiciatis unde omnis iste natus error sit voluptatem accusantium doloremque laudantium, totam rem...
+						                				<a class="more-info" href="#"> <span> </span>Read more</a>
+						                			</p>
+						                		</div>
+						                		<div class="clear"> </div>
+						                	</div>
+						                </div>
+						                <div class="item-right">
+						                	<p class="quot">At vero eos et accusamus et iusto odio dignissimos ducimus qui blanditiis praesentium voluptatum delenti atque corrupti </p>
+						                	<ul>
+						                		<li><a href="#">Davinski Mortge</a></li>
+						                		<li><span> </span></li>
+						                		<div class="clear"> </div>
+						                	</ul>
+						                </div>
+						                <div class="clear"> </div>
+				                </div>
+			              </div>
+			              <!-- Owl Carousel Assets -->
+					    <!-- Prettify -->
+					    <script src="./js/owl.carousel.js"></script>
+					        <script>
+					    $(document).ready(function() {
+					      $("#owl-demo").owlCarousel({
+					        items :1,
+					        lazyLoad : true,
+					        autoPlay : true,
+					        navigation : true,
+						    navigationText : ["",""],
+						    rewindNav : false,
+						    scrollPerPage : false,
+						    pagination : false,
+			    			paginationNumbers: false,
+					      });
+					
+					    });
+					    </script>
+					   <!-- //Owl Carousel Assets -->
+				<!----//End-img-cursual---->
+				</div>
+			</div>
+			<!---//blog-info--->
+			<!---people-says---->
+			<!----------------start-testmonials-------------->
+				<div class="test-monials-grids">
+	           	 <div class="wrap">
+				<div class="examples" id="textslider">
+					<div class="slider">
+						<div class="slider-mask-wrap">
+							<div class="slider-mask">
+								<ul class="slider-target instance-1" style="position: relative; left: -3510px; width: 5850px;">
+									<li data-slide="0" style="width: 1170px;">
+										<div class="inner">
+											<p>"I m wondering why I never contacted these guys sooner! Seriously, they all have commendable talent in their respective field and knocked my concept out of the ballpark. Thanks for an amazing experience!"</p>
+										</div>
+										<div class="test-auther">
+											<span> </span>
+											<p><a href="#">- Segero, NoranicMeds</a></p>
+										</div>
+									</li>
+									<li data-slide="1" style="width: 1170px;">
+										<div class="inner">
+											<p>"I m wondering why I never contacted these guys sooner! Seriously, they all have commendable talent in their respective field and knocked my concept out of the ballpark. Thanks for an amazing experience!"</p>
+										</div>
+										<div class="test-auther">
+											<span> </span>
+											<p><a href="#">- Segero, NoranicMeds</a></p>
+										</div>
+									</li>
+									<li data-slide="2" style="width: 1170px;">
+										<div class="inner">
+											<p>"I m wondering why I never contacted these guys sooner! Seriously, they all have commendable talent in their respective field and knocked my concept out of the ballpark. Thanks for an amazing experience!"</p>
+										</div>
+										<div class="test-auther">
+											<span> </span>
+											<p><a href="#">- Segero, NoranicMeds</a></p>
+										</div>
+									</li>
+									<li data-slide="3" style="width: 1170px;">
+										<div class="inner">
+											<p>"I m wondering why I never contacted these guys sooner! Seriously, they all have commendable talent in their respective field and knocked my concept out of the ballpark. Thanks for an amazing experience!"</p>
+										</div>
+										<div class="test-auther">
+											<span> </span>
+											<p><a href="#">- Segero, NoranicMeds</a></p>
+										</div>
+									</li>
+									<li data-slide="4" style="width: 1170px;">
+										<div class="inner">
+											<p>"I m wondering why I never contacted these guys sooner! Seriously, they all have commendable talent in their respective field and knocked my concept out of the ballpark. Thanks for an amazing experience!"</p>
+										</div>
+										<div class="test-auther">
+											<span> </span>
+											<p><a href="#">- Segero, NoranicMeds</a></p>
+										</div>
+									</li>
+								</ul>
+								<div class="clearit"> </div>
+							</div>
+						</div>
+					</div>
+				<ul id="selector">
+						<li><a href="#" rel="frame_0" class=""> </a></li>
+						<li><a href="#" rel="frame_1" class=""> </a></li>
+						<li><a href="#" rel="frame_3" class="current"> </a></li>
+				</ul>
+				<script src="./js/jquery-ui.min.js"></script>
+				<script src="./js/hammer.min.js"></script>
+				<script src="./js/responsiveCarousel.js"></script>
+				<script>
+				/* Okay, everything is loaded. Let's go! (on dom ready) */
+				$(function () {
+				    /* a generic product carousel - something that might appear in the body of a e-commerce site. */
+				    $('#textslider')
+				        .responsiveCarousel({
+				            unitWidth:          'compute',
+				            target:             '#textslider .slider-target',
+				            unitElement:        '#textslider .slider-target > li',
+				            mask:               '#textslider .slider-mask',
+				            arrowLeft:          '#textslider .arrow-left',
+				            arrowRight:         '#textslider .arrow-right',
+				            dragEvents:         Modernizr.touch,
+				            responsiveUnitSize:function () {
+				                return 1;
+				            },
+				            step:-1,
+				            onShift:function (i) {
+				                var $current = $('#selector li a[rel=frame_' + i + ']');
+				                $('#selector li a').removeClass('current');
+				                $current.addClass('current');
+				            }
+				        });
+				
+				    /* this next part toggles the "auto slide show" option. */
+				    $('#toggle-slide-show').on('click', function (ev) {
+				        ev.preventDefault();
+				        $('#textslider').responsiveCarousel('toggleSlideShow');
+				    });
+				
+				    /* this lets us jump to a slide */
+				    $('#selector a').on('click', function (ev) {
+				        ev.preventDefault();
+				        var i = /\d/.exec($(this).attr('rel'));
+				        $('#textslider').responsiveCarousel('goToSlide', i);
+				    });
+				
+				});
+				$(window).on('load',function(){
+				    $('.examples').responsiveCarousel('redraw');
+				});
+				</script>
+				</div>
+				</div>
+				</div>
+				<!------------//-------------->
+			<!---//people-says---->
+			<!---start-getintouch---->
+			<div class="get-intouch" id="contact">
+				<div class="wrap">
+					<h3>Get in touch.<span> </span></h3>
+				<div class="get-intouch-grids">
+					<div class="get-intouch-left-address">
+						<h4>Cras at ultrices erat, sed vulputate eros nunc at augue gravida!</h4>
+						<p>2345 Setwant natrer, 1234</p>
+						<p>Washington. United States.</p>
+						<p>(401) 1234 567</p>
+						<p><a href="mailto:hello@mykingdom.com">hello@mykingdom.com</a></p>
+					</div>
+					<div class="get-intouch-center-form">
+						<h5>Say hello!</h5>
+						<form>
+							<input class="frist" type="text" value="Name" onfocus="this.value = '';" onblur="if (this.value == '') {this.value = 'Name';}">
+							<input type="text" value="Email" onfocus="this.value = '';" onblur="if (this.value == '') {this.value = 'Email';}">
+							<textarea onfocus="if(this.value == 'Your Message') this.value='';" onblur="if(this.value == '') this.value='Your Message';" >Your Message</textarea>
+							<input type="submit" value="Send message" />
+							<div class="clear"> </div>
+						</form>
+					</div>
+					<div class="get-intouch-right-social">
+						<ul>
+							<li><a class="be normalTip" title="behance" href="#"> </a></li>
+							<li><a class="twitter normalTip" title="Twitter"  href="#"> </a></li>
+							<li><a class="dribble normalTip" title="dribble" href="#"> </a></li>
+							<li><a class="tree normalTip" title="treehouse" href="#"> </a></li>
+							<li><a class="google normalTip" title="google+" href="#"> </a></li>
+						</ul>
+					</div>
+					<!-- aToolTip js -->
+						<script type="text/javascript" src="./js/jquery.atooltip.js"></script>
+						<script type="text/javascript">
+							$(function(){ 
+								$('a.normalTip').aToolTip();
+								}); 
+						</script>
+					<div class="clear"> </div>
+				</div>
+				</div>
+				<div class="map">
+				</div>
+			</div>
+			<!---//End-getintouch---->
+			<!----start-copy-right--->
+			<div class="copy-right">
+				<div class="wrap">
+					<div class="copy-right-left">
+					<p>&#169; 2014 <span>my.kingdom.</span> All Rights Reserved.</p>
+					</div>
+					<div class="copy-right-right">
+						<p>Template by <a href="http://w3layouts.com/">W3layouts</a></p>
+					    <a href="#move-top" id="toTop" style="display: block;"><span id="toTopHover" style="opacity: 1;"> </span></a>
+					</div>
+					<div class="clear"> </div>
+				</div>
+			</div>
+			<!----//End-copy-right--->
+			<!---smoth-scrlling---->
+							<script type="text/javascript">
+									$(document).ready(function(){
+									$('a[href^="#"]').on('click',function (e) {
+									    e.preventDefault();
+									    var target = this.hash,
+									    $target = $(target);
+									    $('html, body').stop().animate({
+									        'scrollTop': $target.offset().top
+									    }, 1000, 'swing', function () {
+									        window.location.hash = target;
+									    });
+									});
+								});
+							</script>
+					<!---//smoth-scrlling---->
+		<!---//End-content--->
+		<!----//wrap---->
+	</body>
 </html>
+
