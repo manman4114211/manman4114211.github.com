@@ -1,0 +1,82 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml" xml:lang="ko" lang="ko">
+<head>
+<title>在线字符串转二维码</title>
+<meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
+<meta name="viewport" content="width=device-width,initial-scale=1,user-scalable=no" />
+  <style>
+    h1 {
+      font: 20px '黑体', 'Open Sans Condensed', sans-serif;
+    }
+    h1 small {
+      color: #888888;
+      letter-spacing: 0;
+    }
+    .group {
+      margin-bottom: 10px;
+      width: 100%;
+    }
+    input {
+      background-color: #FFFFFF;
+      border: 1px solid #D5D5D5;
+      border-radius: 0 0 0 0 !important;
+      color: #858585;
+      font-family: inherit;
+      font-size: 14px;
+      line-height: 1.2;
+      padding: 5px 4px;
+      width: 90%;
+    }
+    button {
+      padding: 3px 12px;
+      font-size: 14px;
+      font-weight: normal;
+      line-height: 1.5;
+      cursor: pointer;
+      border: 1px solid transparent;
+      border-radius: 4px;
+      background-color: #53bee6;
+      border-color: #53BEE6;
+    }
+  </style>
+</head>
+<body>
+  <h1>在线字符串转二维码  <small>online str2qrCode</small></h1>
+  <div class="group">
+    <input id="text" type="text" value="" placeholder="请输入要转换的字符串" autofocus>
+  </div>
+  <div class="group">
+    <button type="button">Enter</button>
+  </div>
+<div id="qrcode" style="margin:15px;"></div>
+
+<script type="text/javascript" src="js/jquery.min.js"></script>
+<script type="text/javascript" src="js/qrcode.js"></script>
+<script type="text/javascript">
+var qrcode = new QRCode(document.getElementById("qrcode"), {
+	width : 300,
+	height : 300
+});
+
+function makeCode () {		
+	var elText = document.getElementById("text");
+	
+	if (!elText.value) {
+		elText.focus();
+		return;
+	}
+	
+	qrcode.makeCode(elText.value);
+}
+
+$("#text").
+	on("blur", function () {
+		makeCode();
+	}).
+	on("keydown", function (e) {
+		if (e.keyCode == 13) {
+			makeCode();
+		}
+	});
+</script>
+</body>
