@@ -28,6 +28,7 @@ body {
     height: 20px;
     line-height: 20px;
     color: #666;
+    font-weight: 700;
 }
 .ticket-card .ticket-number {
     height: 20px;
@@ -112,6 +113,8 @@ body {
 }
 .txt-danger {
     color: #FF4646 !important;
+    padding-left: 5px;
+    font-size:14px;
 }
 .story img {
     margin-top: 20px;
@@ -129,10 +132,16 @@ body {
     line-height: 25px;
     font: 1.1em sans-serif;
     margin-top: 15px;
+    margin-bottom: 20px;
+    text-decoration: none;
+    font-weight: 600;
 }
 .youdq {
     float: right;
     line-height: 25px;
     font: 1.1em sans-serif;
     margin-top: 15px;
+    margin-bottom: 20px;
+    text-decoration: none;
+    font-weight: 600;
 }
