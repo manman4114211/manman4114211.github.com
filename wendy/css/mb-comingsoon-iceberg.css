@@ -108,7 +108,7 @@
   }
   .counter-block .counter .number {
     font-size: 86px;
-    line-height: 72px;
+
   }
   .counter-block .counter.with-hundreds {
     width: 144px;
@@ -127,7 +127,6 @@
   }
   .counter-block .counter .number {
     font-size: 55px;
-    line-height: 50px;
   }
   .counter-block .counter.with-hundreds {
     width: 92px;
