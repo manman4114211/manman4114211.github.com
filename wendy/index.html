@@ -6,7 +6,8 @@
 	<meta name="description" content="This page is to record our story">
 	<meta name="author" content="Shen Dong Dong">
 	<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
-
+	
+	<link rel="shortcut icon" type="image/x-icon" href="images/favicon.png">
   	<link rel="stylesheet" href="css/zerogrid.css">
 	<link rel="stylesheet" href="css/style.css">
 	<link rel="stylesheet" href="css/mb-comingsoon-iceberg.css" />
@@ -65,6 +66,133 @@
 							</div>
 						</div>
 						
+					</div>
+				</div>
+			</div>
+		</section>
+		<section class="content-box boxstyle-2 box-2">
+			<div class="zerogrid" style="width: 100%;">
+				<div class="row wrap-box"><!--Start Box-->
+					<div class="header">
+						<div class="wrapper">
+							<h2 class="color-yellow">GALLERY</h2>
+							<hr class="line">
+							<div class="intro">Lorem ipsum dolor sit amet</div>
+						</div>
+					</div>
+					<div class="row">
+						<div class="col-1-3">
+							<div class="item-container">
+								<div class="item-caption">
+									<div class="item-caption-inner">
+										<div class="item-caption-inner1">
+											
+										</div>
+									</div>
+								</div>
+								<img src="images/gallery/1695034793814.png" />
+							</div>
+						</div>
+						<div class="col-1-3">
+							<div class="item-container">
+								<div class="item-caption">
+									<div class="item-caption-inner">
+										<div class="item-caption-inner1">
+											
+										</div>
+									</div>
+								</div>
+								<img src="images/gallery/1695034793882.png" />
+							</div>
+						</div>
+						<div class="col-1-3">
+							<div class="item-container">
+								<div class="item-caption">
+									<div class="item-caption-inner">
+										<div class="item-caption-inner1">
+											
+										</div>
+									</div>
+								</div>
+								<img src="images/gallery/1695034793660.png" />
+							</div>
+						</div>
+					</div>
+					<div class="row">
+						<div class="col-1-3">
+							<div class="item-container">
+								<div class="item-caption">
+									<div class="item-caption-inner">
+										<div class="item-caption-inner1">
+											
+										</div>
+									</div>
+								</div>
+								<img src="images/gallery/1695035106194.jpg" />
+							</div>
+						</div>
+						<div class="col-1-3">
+							<div class="item-container">
+								<div class="item-caption">
+									<div class="item-caption-inner">
+										<div class="item-caption-inner1">
+											
+										</div>
+									</div>
+								</div>
+								<img src="images/gallery/1695035106289.jpg" />
+							</div>
+						</div>
+						<div class="col-1-3">
+							<div class="item-container">
+								<div class="item-caption">
+									<div class="item-caption-inner">
+										<div class="item-caption-inner1">
+											
+										</div>
+									</div>
+								</div>
+								<img src="images/gallery/1695035106358.jpg" />
+							</div>
+						</div>
+					</div>
+					<div class="row">
+						<div class="col-1-3">
+							<div class="item-container">
+								<div class="item-caption">
+									<div class="item-caption-inner">
+										<div class="item-caption-inner1">
+											
+										</div>
+									</div>
+								</div>
+								<img src="images/gallery/1695036941437.jpg" />
+							</div>
+						</div>
+						<div class="col-1-3">
+							<div class="item-container">
+								<div class="item-caption">
+									<div class="item-caption-inner">
+										<div class="item-caption-inner1">
+											
+										</div>
+									</div>
+								</div>
+								<img src="images/gallery/1695036978350.jpg" />
+							</div>
+						</div>
+						<div class="col-1-3">
+							<div class="item-container">
+								<div class="item-caption">
+									<div class="item-caption-inner">
+										<div class="item-caption-inner1">
+											
+										</div>
+									</div>
+								</div>
+								<img src="images/gallery/1695037030086.jpg" />
+							</div>
+						</div>
 					</div>
 				</div>
 			</div>
@@ -184,14 +312,14 @@
     <script src="js/jquery.mb-comingsoon.min.js"></script>
     <script type="text/javascript">
         $(function () {
-            $('#myCounter').mbComingsoon({ expiryDate: new Date('2023/10/01'), speed:100 });
+            $('#myCounter').mbComingsoon({ expiryDate: new Date('2023-10-1'), speed:100 });
             setTimeout(function () {
                 $(window).resize();
             }, 100);
 			
 			setInterval(function() {
 				var now = new Date();
-				var time = new Date('2022/01/07 10:00:00');
+				var time = new Date('2022-1-7 10:00:00');
 				var date = now.getTime() - time.getTime();
 				
 				var days = Math.floor(date/(24*3600*1000));
@@ -207,7 +335,7 @@
 				
 				$('#myCounter1').html('距离2022年1月7号<br>我们已经认识'+days+'天'+hours+'小时'+minutes+'分钟'+seconds+'秒');
 				
-				var time2 = new Date('2022/04/09 10:00:00');
+				var time2 = new Date('2022-4-9 10:00:00');
 				var date2 = now.getTime() - time2.getTime();
 				
 				var days2 = Math.floor(date2/(24*3600*1000));
