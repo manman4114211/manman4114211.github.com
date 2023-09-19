@@ -64,7 +64,7 @@ body .wrap-body{}
 /* ---------------------------------------------------------------------------- */
 header{}
 header .wrap-header{}
-header .main-header{background: url(../images/slider.jpg) fixed center center; background-color: #222;color:#fff;min-height: 600px;text-align: center;padding-top: 100px}
+header .main-header{background: url(../images/slider.jpg) center center; background-color: #222;color:#fff;min-height: 600px;text-align: center;padding-top: 100px}
 header .main-header h1{font-size: 67px;margin: 20px 0; line-height: 1.2;font-weight: 500;}
 header .main-header .counter{padding: 60px 0px 40px 0px;}
 
