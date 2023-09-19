@@ -312,14 +312,14 @@
     <script src="js/jquery.mb-comingsoon.min.js"></script>
     <script type="text/javascript">
         $(function () {
-            $('#myCounter').mbComingsoon({ expiryDate: new Date('2023-10-1'), speed:100 });
+            $('#myCounter').mbComingsoon({ expiryDate: new Date('2023/10/01'), speed:100 });
             setTimeout(function () {
                 $(window).resize();
             }, 100);
 			
 			setInterval(function() {
 				var now = new Date();
-				var time = new Date('2022-1-7 10:00:00');
+				var time = new Date('2022/01/07 10:00:00');
 				var date = now.getTime() - time.getTime();
 				
 				var days = Math.floor(date/(24*3600*1000));
@@ -335,7 +335,7 @@
 				
 				$('#myCounter1').html('距离2022年1月7号<br>我们已经认识'+days+'天'+hours+'小时'+minutes+'分钟'+seconds+'秒');
 				
-				var time2 = new Date('2022-4-9 10:00:00');
+				var time2 = new Date('2022/04/09 10:00:00');
 				var date2 = now.getTime() - time2.getTime();
 				
 				var days2 = Math.floor(date2/(24*3600*1000));
